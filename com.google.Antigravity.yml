@@ -1,0 +1,34 @@
+id: com.google.Antigravity
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: antigravity
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --socket=session-bus
+  - --device=dri
+  - --filesystem=home
+  - --talk-name=org.freedesktop.secrets
+  - --env=XDG_CURRENT_DESKTOP=Unity
+modules:
+  - name: antigravity
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/lib/antigravity /app/bin
+      - cp -r . /app/lib/antigravity/
+      - |
+        cat << 'EOF' > /app/bin/antigravity
+        #!/bin/sh
+        # Disable internal SUID sandbox incompatible with Flatpak
+        export LD_LIBRARY_PATH=/app/lib/antigravity:$LD_LIBRARY_PATH
+        exec /app/lib/antigravity/antigravity --no-sandbox --disable-setuid-sandbox "$@"
+        EOF
+      - chmod +x /app/bin/antigravity /app/lib/antigravity/antigravity
+    sources:
+      - type: archive
+        url: https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/1.13.3-4533425205018624/linux-x64/Antigravity.tar.gz
+        sha256: 084dfbedf1049b363aa3ad7ba679eec8b80feaf29585accb90b5910ebb270048 # Update this if checksum changes
+        strip-components: 1
